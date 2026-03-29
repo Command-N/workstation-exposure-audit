@@ -596,10 +596,7 @@ fi
 GH_HOSTS="$HOME/.config/gh/hosts.yml"
 if [ -f "$GH_HOSTS" ]; then
     # Check if the file contains an actual token value (not just blank metadata)
-    GH_TOKEN_BLANK=$(grep -E "^\s*(oauth_token|token):\s*$" "$GH_HOSTS" 2>/dev/null || true)
-    GH_TOKEN_PRESENT=$(grep -cE "^\s*(oauth_token|token):\s*.+" "$GH_HOSTS" 2>/dev/null || echo "0")
-
-    if [ "$GH_TOKEN_PRESENT" -gt 0 ]; then
+    if grep -qE "^\s*(oauth_token|token):\s*.+" "$GH_HOSTS" 2>/dev/null; then
         add_finding "exposed" "git" \
             "GitHub CLI token stored in plaintext ($GH_HOSTS)" \
             "Token grants access to your GitHub repos — scope depends on how you authenticated" \
