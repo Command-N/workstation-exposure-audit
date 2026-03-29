@@ -4,7 +4,7 @@ A local audit script that shows you how exposed your machine would be if a suppl
 
 **This script runs entirely offline. No network calls are made. No data leaves your machine. Secret values are never read or displayed — only metadata like file paths and value lengths.**
 
-We strongly encourage you to read the source code before running it. It's around 1000 lines of bash and is written to be readable. Never run a security script you haven't read.
+I strongly encourage you to read the source code before running it. It's around 1000 lines of bash and is written to be readable. Never run a security script you haven't read.
 
 > This script was created with the assistance of Claude (Anthropic). No assurances are made as to its accuracy, completeness, or fitness for any particular purpose. Use it as a starting point for understanding your exposure, not as a definitive security assessment.
 
