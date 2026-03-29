@@ -125,12 +125,16 @@ IS_MACOS=true
 
 printf "\n"
 printf "${BOLD}╔═══════════════════════════════════════════════════════════════╗${NC}\n"
-printf "${BOLD}║  liteLLM Supply Chain Attack — Workstation Exposure Audit v2 ║${NC}\n"
-printf "${BOLD}║  Based on TeamPCP payload (March 24, 2026, 500K+ machines)  ║${NC}\n"
+printf "${BOLD}║  Workstation Security Audit — macOS                          ║${NC}\n"
+printf "${BOLD}║  Check your exposure to supply chain credential theft         ║${NC}\n"
+printf "${BOLD}║  Inspired by the TeamPCP / liteLLM attack (March 2026)       ║${NC}\n"
+printf "${BOLD}║                                                               ║${NC}\n"
+printf "${BOLD}║  Runs entirely locally. No network calls. No data leaves      ║${NC}\n"
+printf "${BOLD}║  your machine. Secret values are never read or displayed.     ║${NC}\n"
+printf "${BOLD}║  Read the source to verify:                                   ║${NC}\n"
+printf "${BOLD}║  github.com/Command-N/workstation-exposure-audit              ║${NC}\n"
 printf "${BOLD}╚═══════════════════════════════════════════════════════════════╝${NC}\n"
 printf "\n"
-printf "  ${DIM}Runs entirely locally. Never reads secret values. No network calls.${NC}\n"
-printf "  ${DIM}Analyses security properties and metadata only.${NC}\n"
 if [ "$SIMULATE_MODE" = true ]; then
     printf "  ${YELLOW}${BOLD}Attacker simulation mode enabled (--simulate)${NC}\n"
 fi
