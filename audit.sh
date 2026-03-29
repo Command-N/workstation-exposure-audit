@@ -112,10 +112,12 @@ subsection() {
 }
 
 # --- Platform detection ---
-IS_MACOS=false
-if [ "$(uname)" = "Darwin" ]; then
-    IS_MACOS=true
+if [ "$(uname)" != "Darwin" ]; then
+    printf "\nThis script is designed for macOS only.\n"
+    printf "Linux and Windows are not currently supported.\n\n"
+    exit 1
 fi
+IS_MACOS=true
 
 # =============================================================================
 # BEGIN AUDIT
@@ -586,6 +588,32 @@ if command -v git >/dev/null 2>&1; then
     esac
 fi
 
+# GitHub CLI credentials
+GH_HOSTS="$HOME/.config/gh/hosts.yml"
+if [ -f "$GH_HOSTS" ]; then
+    # Check if the file contains an actual token value (not just blank metadata)
+    GH_TOKEN_BLANK=$(grep -E "^\s*(oauth_token|token):\s*$" "$GH_HOSTS" 2>/dev/null || true)
+    GH_TOKEN_PRESENT=$(grep -cE "^\s*(oauth_token|token):\s*.+" "$GH_HOSTS" 2>/dev/null || echo "0")
+
+    if [ "$GH_TOKEN_PRESENT" -gt 0 ]; then
+        add_finding "exposed" "git" \
+            "GitHub CLI token stored in plaintext ($GH_HOSTS)" \
+            "Token grants access to your GitHub repos — scope depends on how you authenticated" \
+            "Attacker can push code, modify Actions workflows, and access private repos" \
+            "Re-run 'gh auth logout && gh auth login' and choose Keychain for credential storage"
+    else
+        add_finding "safe" "git" \
+            "GitHub CLI config exists but token is stored in macOS Keychain (not plaintext)" \
+            "$GH_HOSTS — token field is blank, credential is Keychain-protected" \
+            "" ""
+    fi
+else
+    add_finding "safe" "git" \
+        "No GitHub CLI credentials file" \
+        "$GH_HOSTS not found" \
+        "" ""
+fi
+
 
 # =============================================================================
 # SECTION 6: DOCKER CONFIGURATION
@@ -884,8 +912,32 @@ else
     add_finding "safe" "ioc" "No exfiltration artifacts in /tmp/" "" "" ""
 fi
 
-# Malicious .pth file
-PTH_FOUND=$(find / -name "litellm_init.pth" -type f 2>/dev/null | head -5 || true)
+# Malicious .pth file — search known Python site-packages locations only (not full filesystem)
+printf "  ${DIM}Note: .pth scan checks common Python install locations (system, Homebrew, pyenv,${NC}\n"
+printf "  ${DIM}conda, user installs). Custom or deeply nested virtualenvs may not be covered.${NC}\n\n"
+
+PTH_FOUND=""
+for pth_glob in \
+    "/usr/local/lib/python*/site-packages/litellm_init.pth" \
+    "/usr/lib/python*/site-packages/litellm_init.pth" \
+    "/opt/homebrew/lib/python*/site-packages/litellm_init.pth" \
+    "/Library/Python/*/lib/python/site-packages/litellm_init.pth" \
+    "$HOME/Library/Python/*/lib/python/site-packages/litellm_init.pth" \
+    "$HOME/.local/lib/python*/site-packages/litellm_init.pth" \
+    "$HOME/.pyenv/versions/*/lib/python*/site-packages/litellm_init.pth" \
+    "$HOME/miniforge*/lib/python*/site-packages/litellm_init.pth" \
+    "$HOME/miniforge*/envs/*/lib/python*/site-packages/litellm_init.pth" \
+    "$HOME/anaconda*/lib/python*/site-packages/litellm_init.pth" \
+    "$HOME/anaconda*/envs/*/lib/python*/site-packages/litellm_init.pth" \
+    "$HOME/miniconda*/lib/python*/site-packages/litellm_init.pth" \
+    "$HOME/miniconda*/envs/*/lib/python*/site-packages/litellm_init.pth"; do
+    for match in $pth_glob; do
+        [ -f "$match" ] && PTH_FOUND="$PTH_FOUND
+$match"
+    done
+done
+PTH_FOUND=$(echo "$PTH_FOUND" | grep -v '^$' | sort -u | head -5 || true)
+
 if [ -n "$PTH_FOUND" ]; then
     COMPROMISED=true
     add_finding "critical" "ioc" \
@@ -894,7 +946,7 @@ if [ -n "$PTH_FOUND" ]; then
         "Every time Python starts, this file runs the credential stealer again" \
         "Delete immediately. Recreate virtual environments from scratch. Rotate ALL credentials."
 else
-    add_finding "safe" "ioc" "No litellm_init.pth found" "" "" ""
+    add_finding "safe" "ioc" "No litellm_init.pth found in known Python locations" "" "" ""
 fi
 
 # Kubernetes backdoor pods
