@@ -1025,7 +1025,7 @@ if [ "$CRITICAL_COUNT" -gt 0 ] || [ "$EXPOSED_COUNT" -gt 0 ]; then
 fi
 
 printf "\n"
-printf "${DIM}  Source: TeamPCP liteLLM payload analysis (github.com/BerriAI/litellm/issues/24512)${NC}\n"
+printf "${DIM}  Inspired by the TeamPCP liteLLM attack (github.com/BerriAI/litellm/issues/24512)${NC}\n"
 printf "${DIM}  This script ran entirely locally. No data left your machine.${NC}\n"
-printf "${DIM}  v2 — github.com/... — MIT License${NC}\n"
+printf "${DIM}  github.com/Command-N/workstation-exposure-audit — MIT License${NC}\n"
 printf "\n"
