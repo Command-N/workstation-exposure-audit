@@ -1,4 +1,4 @@
-# Workstation Security Audit — macOS
+# Workstation Exposure Audit — macOS
 
 A local audit script that shows you how exposed your machine would be if a supply chain attack ran as your user today.
 
